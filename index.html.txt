@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة تيك توك - Tic Tac Toe</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            padding: 20px;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: white;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .mode-selector {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+        }
+        
+        .mode-btn:hover, .mode-btn.active {
+            background: white;
+            color: #667eea;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .game-info {
+            background: rgba(255,255,255,0.95);
+            padding: 15px 30px;
+            border-radius: 20px;
+            margin: 20px 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            display: inline-block;
+        }
+        
+        .turn-indicator {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:hover:not(.taken) {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        .cell.taken {
+            cursor: not-allowed;
+        }
+        
+        .cell.x {
+            color: #667eea;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .cell.o {
+            color: #764ba2;
+            animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-180deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+        
+        .cell.win {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            animation: pulse 0.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .score-board {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .score-item {
+            background: rgba(255,255,255,0.9);
+            padding: 15px 25px;
+            border-radius: 15px;
+            min-width: 100px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #667eea;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.5s;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .modal p {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .winner-x { color: #667eea; }
+        .winner-o { color: #764ba2; }
+        .draw { color: #f5576c; }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            animation: float-particle 10s infinite;
+        }
+        
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+        }
+        
+        @media (max-width: 480px) {
+            h1 { font-size: 2rem; }
+            .cell { font-size: 2rem; }
+            .board { max-width: 350px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <h1>⭕ ❌ تيك توك</h1>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('pvp')">👥 لاعب ضد لاعب</button>
+            <button class="mode-btn" onclick="setMode('ai')">🤖 لاعب ضد الكمبيوتر</button>
+        </div>
+        
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">❌ اللاعب X</div>
+                <div class="score-value" id="scoreX">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">⭕ اللاعب O</div>
+                <div class="score-value" id="scoreO">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">🤝 التعادل</div>
+                <div class="score-value" id="scoreDraw">0</div>
+            </div>
+        </div>
+        
+        <div class="game-info">
+            <div class="turn-indicator" id="turnIndicator">دور اللاعب ❌</div>
+        </div>
+        
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        
+        <div class="controls">
+            <button class="btn btn-primary" onclick="resetGame()">
+                🔄 لعبة جديدة
+            </button>
+            <button class="btn btn-secondary" onclick="resetScores()">
+                🗑️ تصفير النقاط
+            </button>
+        </div>
+    </div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">🎉 مبروك!</h2>
+            <p id="modalMessage">اللاعب X فاز!</p>
+            <button class="btn btn-primary" onclick="closeModal()">
+                العب مرة أخرى
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let gameActive = true;
+        let gameMode = 'pvp'; // 'pvp' or 'ai'
+        let scores = { X: 0, O: 0, draw: 0 };
+        
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // صفوف
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // أعمدة
+            [0, 4, 8], [2, 4, 6] // قطريات
+        ];
+        
+        const cells = document.querySelectorAll('.cell');
+        const turnIndicator = document.getElementById('turnIndicator');
+        const modal = document.getElementById('modal');
+        
+        // إنشاء الجزيئات الخلفية
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+        
+        createParticles();
+        
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+        
+        function setMode(mode) {
+            gameMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            resetGame();
+        }
+        
+        function handleCellClick(e) {
+            const clickedCell = e.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+            
+            if (board[clickedCellIndex] !== '' || !gameActive) return;
+            
+            if (gameMode === 'ai' && currentPlayer === 'O') return;
+            
+            updateCell(clickedCell, clickedCellIndex);
+            handleResult();
+            
+            if (gameMode === 'ai' && gameActive && currentPlayer === 'O') {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+        
+        function updateCell(cell, index) {
+            board[index] = currentPlayer;
+            cell.textContent = currentPlayer === 'X' ? '❌' : '⭕';
+            cell.classList.add('taken', currentPlayer.toLowerCase());
+        }
+        
+        function handleResult() {
+            let roundWon = false;
+            let winningCombo = [];
+            
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    roundWon = true;
+                    winningCombo = [a, b, c];
+                    break;
+                }
+            }
+            
+            if (roundWon) {
+                endGame(false, winningCombo);
+                return;
+            }
+            
+            if (!board.includes('')) {
+                endGame(true);
+                return;
+            }
+            
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            updateTurnIndicator();
+        }
+        
+        function updateTurnIndicator() {
+            const symbol = currentPlayer === 'X' ? '❌' : '⭕';
+            turnIndicator.textContent = gameMode === 'ai' && currentPlayer === 'O' 
+                ? 'يفكر الكمبيوتر... 🤔' 
+                : `دور اللاعب ${symbol}`;
+        }
+        
+        function makeAIMove() {
+            if (!gameActive) return;
+            
+            const bestMove = getBestMove();
+            const cell = document.querySelector(`[data-index="${bestMove}"]`);
+            updateCell(cell, bestMove);
+            handleResult();
+        }
+        
+        function getBestMove() {
+            // خوارزمية Minimax مع Alpha-Beta Pruning
+            let bestScore = -Infinity;
+            let move = -1;
+            
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false, -Infinity, Infinity);
+                    board[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+            return move;
+        }
+        
+        function minimax(board, depth, isMaximizing, alpha, beta) {
+            let result = checkWinner();
+            if (result !== null) {
+                return result === 'O' ? 10 - depth : result === 'X' ? depth - 10 : 0;
+            }
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false, alpha, beta);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                        alpha = Math.max(alpha, score);
+                        if (beta <= alpha) break;
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true, alpha, beta);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                        beta = Math.min(beta, score);
+                        if (beta <= alpha) break;
+                    }
+                }
+                return bestScore;
+            }
+        }
+        
+        function checkWinner() {
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return board[a];
+                }
+            }
+            if (!board.includes('')) return 'draw';
+            return null;
+        }
+        
+        function endGame(draw, winningCombo = []) {
+            gameActive = false;
+            
+            if (draw) {
+                scores.draw++;
+                document.getElementById('scoreDraw').textContent = scores.draw;
+                showModal('🤝 تعادل!', 'لم يفز أحد هذه المرة، حاول مرة أخرى!', 'draw');
+            } else {
+                scores[currentPlayer]++;
+                document.getElementById(`score${currentPlayer}`).textContent = scores[currentPlayer];
+                
+                // تلوين الخلايا الفائزة
+                winningCombo.forEach(index => {
+                    cells[index].classList.add('win');
+                });
+                
+                const winnerSymbol = currentPlayer === 'X' ? '❌' : '⭕';
+                const winnerText = gameMode === 'ai' && currentPlayer === 'O' 
+                    ? 'فاز الكمبيوتر! 🤖' 
+                    : `فاز اللاعب ${winnerSymbol}! 🎉`;
+                showModal('🏆 فوز!', winnerText, currentPlayer.toLowerCase());
+            }
+        }
+        
+        function showModal(title, message, winnerClass) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalTitle').className = winnerClass === 'x' ? 'winner-x' : winnerClass === 'o' ? 'winner-o' : 'draw';
+            document.getElementById('modalMessage').textContent = message;
+            modal.classList.add('show');
+        }
+        
+        function closeModal() {
+            modal.classList.remove('show');
+            resetGame();
+        }
+        
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            currentPlayer = 'X';
+            updateTurnIndicator();
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('taken', 'x', 'o', 'win');
+            });
+        }
+        
+        function resetScores() {
+            scores = { X: 0, O: 0, draw: 0 };
+            document.getElementById('scoreX').textContent = '0';
+            document.getElementById('scoreO').textContent = '0';
+            document.getElementById('scoreDraw').textContent = '0';
+            resetGame();
+        }
+        
+        // إغلاق النافذة المنبثقة عند النقر خارجها
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    </script>
+</body>
+</html>
